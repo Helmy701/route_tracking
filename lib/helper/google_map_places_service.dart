@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:route_tracking/models/place_details_model/place_details_model.dart';
 import 'package:route_tracking/models/places_autocomplete_model/places_autocomplete_model.dart';
 
-class GoogleMapsPlacesService {
+class PlacesService {
   final String baseUrl = 'https://maps.googleapis.com/maps/api/place/';
   final String apiKey = "AIzaSyBVofSHmm5fYuCQFYHlNSltQJhVjAi1H80";
   Future<List<PlacesAutocompleteModel>> getPredictions(
