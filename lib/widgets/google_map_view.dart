@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -167,6 +169,26 @@ class _GoogleMapViewState extends State<GoogleMapView> {
       points: polylineCoordinates,
     );
     polyLines.add(route);
+    LatLngBounds bounds = getLatLungBounds(polylineCoordinates);
+
+    googleMapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 20));
     setState(() {});
+  }
+
+  LatLngBounds getLatLungBounds(List<LatLng> points) {
+    var southWestLatitude = points.first.latitude;
+    var southWestLongtude = points.first.longitude;
+    var northEastLatitude = points.first.latitude;
+    var northEastLongtude = points.first.longitude;
+    for (var point in points) {
+      southWestLatitude = min(southWestLatitude, point.latitude);
+      southWestLongtude = min(southWestLongtude, point.longitude);
+      northEastLatitude = max(northEastLatitude, point.longitude);
+      northEastLongtude = max(northEastLongtude, point.longitude);
+    }
+    return LatLngBounds(
+      southwest: LatLng(southWestLatitude, southWestLongtude),
+      northeast: LatLng(northEastLatitude, northEastLongtude),
+    );
   }
 }
