@@ -11,6 +11,8 @@ import 'package:route_tracking/models/places_autocomplete_model/places_autocompl
 class MapServices {
   LocationService locationService = LocationService();
   PlacesService placesService = PlacesService();
+  LatLng? currentLocation;
+  bool isFirstCall = true;
   Future<void> getPredictions({
     required String sessionToken,
     required String input,
@@ -27,13 +29,12 @@ class MapServices {
   }
 
   Future<void> getRoute(
-      {required LatLng currentLocation,
-      required LatLng destinationLocation,
+      {required LatLng destinationLocation,
       required List<LatLng> polylineCoordinates}) async {
     PolylinePoints polylinePoints = PolylinePoints();
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
       'AIzaSyBVofSHmm5fYuCQFYHlNSltQJhVjAi1H80',
-      PointLatLng(currentLocation.latitude, currentLocation.longitude),
+      PointLatLng(currentLocation!.latitude, currentLocation!.longitude),
       PointLatLng(destinationLocation.latitude, destinationLocation.longitude),
       travelMode: TravelMode.driving,
     );
@@ -77,22 +78,33 @@ class MapServices {
     );
   }
 
-  Future<LatLng> updatecurrentLocation(
+  void updatecurrentLocation(
       {required GoogleMapController googleMapController,
-      required Set<Marker> markers}) async {
-    var locationData = await locationService.getLocation();
-    var currentLocation =
-        LatLng(locationData.latitude!, locationData.longitude!);
-    CameraPosition myCurrentCameraPosition =
-        CameraPosition(target: currentLocation, zoom: 15);
-    var myMarkers = Marker(
-      markerId: const MarkerId('my_location_marker'),
-      position: currentLocation,
+      required Set<Marker> markers,
+      required Function onUpdateCurrentLocation}) {
+    locationService.getRealTimeLocationData(
+      (locationData) {
+        currentLocation =
+            LatLng(locationData.latitude!, locationData.longitude!);
+
+        var myMarkers = Marker(
+          markerId: const MarkerId('my_location_marker'),
+          position: currentLocation!,
+        );
+        markers.add(myMarkers);
+        if (isFirstCall) {
+          CameraPosition cameraPosition =
+              CameraPosition(target: currentLocation!, zoom: 15);
+          googleMapController
+              .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+          isFirstCall = false;
+        } else {
+          googleMapController
+              .animateCamera(CameraUpdate.newLatLng(currentLocation!));
+        }
+        onUpdateCurrentLocation();
+      },
     );
-    markers.add(myMarkers);
-    googleMapController
-        .animateCamera(CameraUpdate.newCameraPosition(myCurrentCameraPosition));
-    return currentLocation;
   }
 
   Future<PlaceDetailsModel> getPlaceDetails({required String placeId}) async {

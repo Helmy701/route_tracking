@@ -23,7 +23,6 @@ class _GoogleMapViewState extends State<GoogleMapView> {
   late TextEditingController textEditingController;
   String? sessionToken;
   late Uuid uuid;
-  late LatLng currentLocation;
   late LatLng destinationLocation;
   Set<Marker> markers = {};
   Set<Polyline> polyLines = {};
@@ -101,7 +100,6 @@ class _GoogleMapViewState extends State<GoogleMapView> {
                       placeDetailsModel.geometry!.location!.lat!,
                       placeDetailsModel.geometry!.location!.lng!);
                   await mapServices.getRoute(
-                      currentLocation: currentLocation,
                       destinationLocation: destinationLocation,
                       polylineCoordinates: polylineCoordinates);
                   mapServices.displayRoute(
@@ -120,11 +118,12 @@ class _GoogleMapViewState extends State<GoogleMapView> {
     );
   }
 
-  void updatecurrentLocation() async {
+  void updatecurrentLocation() {
     try {
-      currentLocation = await mapServices.updatecurrentLocation(
-          googleMapController: googleMapController, markers: markers);
-      setState(() {});
+      mapServices.updatecurrentLocation(
+          onUpdateCurrentLocation: () => setState(() {}),
+          googleMapController: googleMapController,
+          markers: markers);
     } on LocationServiceException catch (e) {
       // todo
     } on LocationPermissionException catch (e) {
