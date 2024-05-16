@@ -82,29 +82,37 @@ class MapServices {
       {required GoogleMapController googleMapController,
       required Set<Marker> markers,
       required Function onUpdateCurrentLocation}) {
-    locationService.getRealTimeLocationData(
-      (locationData) {
-        currentLocation =
-            LatLng(locationData.latitude!, locationData.longitude!);
+    try {
+      locationService.getRealTimeLocationData(
+        (locationData) {
+          currentLocation =
+              LatLng(locationData.latitude!, locationData.longitude!);
 
-        var myMarkers = Marker(
-          markerId: const MarkerId('my_location_marker'),
-          position: currentLocation!,
-        );
-        markers.add(myMarkers);
-        if (isFirstCall) {
-          CameraPosition cameraPosition =
-              CameraPosition(target: currentLocation!, zoom: 15);
-          googleMapController
-              .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
-          isFirstCall = false;
-        } else {
-          googleMapController
-              .animateCamera(CameraUpdate.newLatLng(currentLocation!));
-        }
-        onUpdateCurrentLocation();
-      },
-    );
+          var myMarkers = Marker(
+            markerId: const MarkerId('my_location_marker'),
+            position: currentLocation!,
+          );
+          markers.add(myMarkers);
+          if (isFirstCall) {
+            CameraPosition cameraPosition =
+                CameraPosition(target: currentLocation!, zoom: 15);
+            googleMapController
+                .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+            isFirstCall = false;
+          } else {
+            googleMapController
+                .animateCamera(CameraUpdate.newLatLng(currentLocation!));
+          }
+          onUpdateCurrentLocation();
+        },
+      );
+    } on LocationServiceException catch (e) {
+      // todo
+    } on LocationPermissionException catch (e) {
+      // todo
+    } catch (e) {
+      //todo
+    }
   }
 
   Future<PlaceDetailsModel> getPlaceDetails({required String placeId}) async {

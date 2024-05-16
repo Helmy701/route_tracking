@@ -71,7 +71,10 @@ class _GoogleMapViewState extends State<GoogleMapView> {
           markers: markers,
           onMapCreated: (controller) {
             googleMapController = controller;
-            updatecurrentLocation();
+            mapServices.updatecurrentLocation(
+                onUpdateCurrentLocation: () => setState(() {}),
+                googleMapController: googleMapController,
+                markers: markers);
           },
           initialCameraPosition: initialCameraPosition,
           zoomControlsEnabled: false,
@@ -116,21 +119,6 @@ class _GoogleMapViewState extends State<GoogleMapView> {
         )
       ],
     );
-  }
-
-  void updatecurrentLocation() {
-    try {
-      mapServices.updatecurrentLocation(
-          onUpdateCurrentLocation: () => setState(() {}),
-          googleMapController: googleMapController,
-          markers: markers);
-    } on LocationServiceException catch (e) {
-      // todo
-    } on LocationPermissionException catch (e) {
-      // todo
-    } catch (e) {
-      //todo
-    }
   }
 
   @override
